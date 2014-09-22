@@ -4,7 +4,7 @@
   "dependencies": {
     "jquery": "~1.11.0",
     "foundation": "~5.4.4",
-    "foundation-icons": "*"
+    "foundation-icon-fonts": "zurb/foundation-icon-fonts"
   },
   "devDependencies": {}
 }
