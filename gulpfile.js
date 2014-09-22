@@ -6,7 +6,7 @@ var gulp = require('gulp');
 // load plugins
 var $ = require('gulp-load-plugins')();
 
-gulp.task('styles', function () {
+gulp.task('styles', ['less'], function () {
     return gulp.src('app/styles/**/*.css')
         .pipe($.autoprefixer('last 1 version'))
         .pipe(gulp.dest('.tmp/styles'))
@@ -63,10 +63,10 @@ gulp.task('extras', function () {
 });
 
 gulp.task('clean', function () {
-    return gulp.src(['.tmp', 'dist'], { read: false }).pipe($.clean());
+    return gulp.src(['.tmp', 'dist', 'app/styles/**/*.css'], { read: false }).pipe($.clean());
 });
 
-gulp.task('build', ['less', 'html', 'images', 'fonts', 'extras']);
+gulp.task('build', ['html', 'images', 'fonts', 'extras']);
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
@@ -116,8 +116,8 @@ gulp.task('watch', ['connect', 'serve'], function () {
         server.changed(file.path);
     });
 
-    gulp.watch('app/less/**/*.less', ['less']);
-    gulp.watch('app/styles/**/*.css', ['styles']);
+    gulp.watch('app/less/**/*.less', ['styles']);
+    // gulp.watch('app/styles/**/*.css', ['styles']);
     gulp.watch('app/scripts/**/*.js', ['scripts']);
     gulp.watch('app/images/**/*', ['images']);
     gulp.watch('bower.json', ['wiredep']);
@@ -128,9 +128,10 @@ var less = require('gulp-less');
 var path = require('path');
 
 gulp.task('less', function () {
-  gulp.src('app/less/**/*.less')
+  return gulp.src('app/less/**/*.less')
     .pipe(less({
       paths: [ path.join(__dirname, 'less', 'includes') ]
     }))
-    .pipe(gulp.dest('app/styles'));
+    .pipe(gulp.dest('app/styles'))
+    .pipe($.size());
 });
