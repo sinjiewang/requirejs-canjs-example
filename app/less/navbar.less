@@ -1,0 +1,134 @@
+@nav-option-color: #fff;
+@nav-option-heigth: 50px;
+
+ul.nav-options {
+
+    li {
+        display:block;
+        border-bottom:1px solid #444;
+
+        a {
+            color: @nav-option-color;
+        }
+
+        ul {
+            background: #333;
+        }
+
+        i[class^="fi"], span {
+            font-size: 2em;
+        }
+
+        span {
+            margin: 5px;
+        }
+    }
+
+    li.active {
+      background: #008CBA;
+      color: @nav-option-color;
+    }
+
+    li:last-child {
+        border-bottom:none;
+    }
+
+    .nav-options-functional {
+        margin: auto;
+
+        & > li {
+            border: none;
+            width: @nav-option-heigth;
+            margin: auto;
+            text-align: center;
+        }
+    }
+
+    .fi-power {
+        color: #FF8000;
+    }
+
+    .has-tip {
+        border-bottom: inherit;
+        cursor: auto;
+    }
+}
+
+@media only screen and (min-width: 64.063em) {
+    .left-off-canvas-menu {
+        transition: inherit;
+        -webkit-transform: inherit;
+        transform: inherit;
+
+        overflow: visible;
+        width: @nav-option-heigth;
+        height: 100%;
+        line-height: @nav-option-heigth;
+        left: -@nav-option-heigth;
+    }
+
+
+    .container {
+        position: relative;
+    }
+
+    .nav-options {
+        margin: auto;
+
+        li {
+            width: @nav-option-heigth;
+            margin: auto;
+            text-align: center;
+
+            &:not(.active):hover {
+                background: #555;
+            }
+
+            &.active:hover {
+                background: #009DCB;
+            }
+        }
+
+        li.has-dropdown {
+            position: relative;
+            height: @nav-option-heigth;
+
+            &:hover > .dropdown,
+            &.not-click:hover > .dropdown {
+              display: block;
+              visibility: visible;
+              position: absolute !important;
+            }
+        }
+    }
+
+    ul.dropdown {
+        visibility: hidden;
+        position:absolute !important;
+        left:100% !important;
+        top:0px;
+        border-left:1px solid #444;
+        width: @nav-option-heigth * 4;
+
+        li {
+            background: #333333;
+            width: 100%;
+            line-height: @nav-option-heigth;
+            height: @nav-option-heigth;
+            padding: 0 15px;
+            // text ellipsis
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            text-align: left;
+            color: @nav-option-color;
+        }
+
+        > a:after {
+            top:45%;
+            border-left:4px solid #aaa;
+            border-top:4px solid transparent;
+            border-bottom:4px solid transparent;
+        }
+    }
+}
