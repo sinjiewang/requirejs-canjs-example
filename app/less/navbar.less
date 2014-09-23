@@ -1,3 +1,15 @@
+/* overwrite foundation-icons settings */
+@font-face {
+  font-family: "foundation-icons";
+  src: url("../fonts/foundation-icons.eot");
+  src: url("../fonts/foundation-icons.eot?#iefix") format("embedded-opentype"),
+       url("../fonts/foundation-icons.woff") format("woff"),
+       url("../fonts/foundation-icons.ttf") format("truetype"),
+       url("../fonts/foundation-icons.svg#fontcustom") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
 @nav-option-color: #fff;
 @nav-option-heigth: 50px;
 
@@ -32,23 +44,24 @@ ul.nav-options {
     li:last-child {
         border-bottom:none;
     }
+}
 
-    .nav-options-functional {
+ul.nav-options-functional {
+    margin: auto;
+
+    li {
+        border: none;
+        width: @nav-option-heigth;
         margin: auto;
-
-        & > li {
-            border: none;
-            width: @nav-option-heigth;
-            margin: auto;
-            text-align: center;
-        }
+        text-align: center;
     }
 
-    .fi-power {
+
+    i.fi-power {
         color: #FF8000;
     }
 
-    .has-tip {
+    a.has-tip {
         border-bottom: inherit;
         cursor: auto;
     }
@@ -124,7 +137,7 @@ ul.nav-options {
             color: @nav-option-color;
         }
 
-        > a:after {
+        a:after {
             top:45%;
             border-left:4px solid #aaa;
             border-top:4px solid transparent;
