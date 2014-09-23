@@ -3,8 +3,9 @@
   "private": true,
   "dependencies": {
     "jquery": "~1.11.0",
-    "foundation": "~5.4.4",
-    "foundation-icon-fonts": "zurb/foundation-icon-fonts"
+    "foundation": "~5.4.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "foundation-icon-fonts": "zurb/foundation-icon-fonts"
+  }
 }
