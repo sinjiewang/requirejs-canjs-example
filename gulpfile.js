@@ -135,3 +135,11 @@ gulp.task('less', function () {
     .pipe(gulp.dest('app/styles'))
     .pipe($.size());
 });
+
+/* gulp-mocha-phantomjs plugin */
+var mochaPhantomJS = require('gulp-mocha-phantomjs');
+
+gulp.task('test', function () {
+  return gulp.src('test/index.html')
+      .pipe(mochaPhantomJS());
+});
