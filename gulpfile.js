@@ -2,6 +2,7 @@
 // generated on 2014-09-22 using generator-gulp-webapp 0.1.0
 
 var gulp = require('gulp');
+var views_production_js = '.tmp/view.production.js';
 
 // load plugins
 var $ = require('gulp-load-plugins')();
@@ -24,7 +25,7 @@ gulp.task('html', ['styles', 'scripts'], function () {
     var jsFilter = $.filter('**/*.js');
     var cssFilter = $.filter('**/*.css');
 
-    return gulp.src('app/*.html')
+    return gulp.src(['app/*.html'])
         .pipe($.useref.assets({searchPath: '{.tmp,app}'}))
         .pipe(jsFilter)
         .pipe($.uglify())
@@ -63,10 +64,31 @@ gulp.task('extras', function () {
 });
 
 gulp.task('clean', function () {
-    return gulp.src(['.tmp', 'dist', 'app/styles/**/*.css'], { read: false }).pipe($.clean());
+    return gulp.src([
+        '.tmp',
+        'dist',
+        'app/styles/**/*.css',
+        /* unit test soft links*/
+        'test/bower_components',
+        'test/scripts',
+        'test/styles',
+    ], { read: false }).pipe($.clean());
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras']);
+gulp.task('build', ['html', 'images', 'fonts', 'extras', 'views'], function () {
+    var addsrc = require('gulp-add-src'),
+        uglify = require('gulp-uglify'),
+        concat = require('gulp-concat'),
+        replace = require('gulp-replace');
+
+    return gulp.src('dist/scripts/vendor.js')
+        .pipe(addsrc(views_production_js))
+        .pipe(uglify())
+        .pipe(concat('vendor.js'))
+        // replace ejs name from app_xxx_ejs to xxx_ejs
+        .pipe(replace(/"app_([\w_]*_ejs)"/g, '"$1"'))
+        .pipe(gulp.dest('dist/scripts'));
+});
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
@@ -111,6 +133,7 @@ gulp.task('watch', ['connect', 'serve'], function () {
         'app/*.html',
         '.tmp/styles/**/*.css',
         'app/scripts/**/*.js',
+        'app/views/**/*.ejs',
         'app/images/**/*'
     ]).on('change', function (file) {
         server.changed(file.path);
@@ -135,3 +158,30 @@ gulp.task('less', function () {
     .pipe(gulp.dest('app/styles'))
     .pipe($.size());
 });
+
+/* gulp-mocha-phantomjs plugin */
+var mochaPhantomJS = require('gulp-mocha-phantomjs');
+
+gulp.task('test', ['styles', 'slink'], function () {
+  return gulp.src(['test/**/*.html', '!test/bower_components/**/*.html'])
+      .pipe(mochaPhantomJS());
+});
+
+/* gulp-shell plugin */
+var shell = require('gulp-shell');
+
+gulp.task('slink', shell.task([
+  'ln -sf ../app/bower_components test/bower_components',
+  'ln -sf ../app/scripts test/scripts',
+  'ln -sf ../app/styles test/styles',
+]));
+
+/* can-compile plugin for canjs */
+var compilerGulp = require('can-compile/gulp.js');
+// Creates a task called 'ejs-views'
+compilerGulp.task('views', {
+  version: '2.1.3',     // canjs version
+  src: ['app/views/**/*.ejs'],
+  out: views_production_js,
+  tags: []
+}, gulp);
