@@ -182,7 +182,7 @@ gulp.task('slink', shell.task([
 var compile = require('can-compile/lib/index.js'),
     glob = require('glob');
 
-gulp.task('views', function(cb) {
+gulp.task('views', function(done) {
     var options = {
         version: '2.1.3',     // canjs version
         out: views_production_js,
@@ -193,7 +193,7 @@ gulp.task('views', function(cb) {
     glob(['app/views/**/*.ejs'].join(), function (er, files) {
         compile(files, options, function(error, output, outfile) {
             console.log('Finished compiling', outfile);
-            cb();
+            done();
         });
     });
 });
