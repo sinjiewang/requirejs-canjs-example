@@ -163,19 +163,22 @@ gulp.task('less', function () {
 /* gulp-mocha-phantomjs plugin */
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
-gulp.task('test', ['styles', 'slink'], function () {
-    return gulp.src(['test/**/*.html', '!test/bower_components/**/*.html'])
+gulp.task('test', ['slink'], function () {
+    return gulp.src([
+        'test/**/*.html',
+        '!test/index.html',
+        '!test/bower_components/**/*.html'])
         .pipe(mochaPhantomJS());
 });
 
 /* gulp-shell plugin */
 var shell = require('gulp-shell');
 
-gulp.task('slink', shell.task([
-    'ln -sf ../app/bower_components test/bower_components',
-    'ln -sf ../app/scripts test/scripts',
-    'ln -sf ../app/styles test/styles',
-    'ln -sf ../app/views test/views',
+gulp.task('slink', ['styles'], shell.task([
+    'ln -s ../app/bower_components test/bower_components',
+    'ln -s ../app/scripts test/scripts',
+    'ln -s ../app/styles test/styles',
+    'ln -s ../app/views test/views',
 ]));
 
 /* can-compile plugin for canjs */
