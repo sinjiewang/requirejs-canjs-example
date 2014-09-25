@@ -25,7 +25,9 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div class="off-canvas-wrap docs-wrap" data-offcanvas>
+        <div id="todos"></div>
+
+        <!-- <div class="off-canvas-wrap docs-wrap" data-offcanvas>
           <div class="inner-wrap">
             <nav class="tab-bar hide-for-large-up">
           <section class="left-small">
@@ -39,7 +41,7 @@
 
             <section class="main-section">
           <div class="row container">
-            <!-- nav options -->
+
             <aside class="left-off-canvas-menu">
               <ul class="nav-options">
                 <li class="functional">
@@ -134,7 +136,7 @@
             </aside>
 
             <div class="large-12 columns content">
-              <!-- content -->
+
               <h2>Camera connection and storage</h2>
               <div class="large-3 medium-6 columns">
                 <div class="panel">
@@ -206,7 +208,7 @@
             </section>
 
           </div>
-        </div>
+        </div> -->
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <!-- <script>
@@ -227,10 +229,12 @@
         <script src="bower_components/jquery-placeholder/jquery.placeholder.js"></script>
         <script src="bower_components/foundation/js/foundation.js"></script>
         <script src="bower_components/canjs/can.jquery.js"></script>
+        <script src="bower_components/canjs/can.ejs.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 
         <!-- build:js scripts/main.js -->
+        <script src="scripts/todos.js"></script>
         <script src="scripts/main.js"></script>
         <!-- endbuild -->
 </body>
