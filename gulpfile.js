@@ -78,12 +78,15 @@ gulp.task('clean', function () {
 gulp.task('build', ['html', 'images', 'fonts', 'extras', 'views'], function () {
     var addsrc = require('gulp-add-src'),
         uglify = require('gulp-uglify'),
-        concat = require('gulp-concat');
+        concat = require('gulp-concat'),
+        replace = require('gulp-replace');
 
     return gulp.src('dist/scripts/vendor.js')
         .pipe(addsrc(views_production_js))
         .pipe(uglify())
         .pipe(concat('vendor.js'))
+        // replace ejs name from app_xxx_ejs to xxx_ejs
+        .pipe(replace(/"app_([\w_]*_ejs)"/g, '"$1"'))
         .pipe(gulp.dest('dist/scripts'));
 });
 

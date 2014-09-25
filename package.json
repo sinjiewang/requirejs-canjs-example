@@ -24,6 +24,7 @@
     "gulp-livereload": "^1.2.0",
     "gulp-load-plugins": "^0.5.0",
     "gulp-mocha-phantomjs": "^0.5.0",
+    "gulp-replace": "^0.4.0",
     "gulp-shell": "^0.2.9",
     "gulp-size": "^0.3.0",
     "gulp-uglify": "^1.0.1",
