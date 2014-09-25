@@ -2,6 +2,7 @@
 // generated on 2014-09-22 using generator-gulp-webapp 0.1.0
 
 var gulp = require('gulp');
+var views_production_js = '.tmp/view.production.js';
 
 // load plugins
 var $ = require('gulp-load-plugins')();
@@ -24,7 +25,7 @@ gulp.task('html', ['styles', 'scripts'], function () {
     var jsFilter = $.filter('**/*.js');
     var cssFilter = $.filter('**/*.css');
 
-    return gulp.src('app/*.html')
+    return gulp.src(['app/*.html'])
         .pipe($.useref.assets({searchPath: '{.tmp,app}'}))
         .pipe(jsFilter)
         .pipe($.uglify())
@@ -63,10 +64,32 @@ gulp.task('extras', function () {
 });
 
 gulp.task('clean', function () {
-    return gulp.src(['.tmp', 'dist', 'app/styles/**/*.css'], { read: false }).pipe($.clean());
+    return gulp.src([
+        '.tmp',
+        'dist',
+        'app/styles/**/*.css',
+        /* unit test soft links*/
+        'test/bower_components',
+        'test/scripts',
+        'test/styles',
+        'test/views'
+    ], { read: false }).pipe($.clean());
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras']);
+gulp.task('build', ['html', 'images', 'fonts', 'extras', 'views'], function () {
+    var addsrc = require('gulp-add-src'),
+        uglify = require('gulp-uglify'),
+        concat = require('gulp-concat'),
+        replace = require('gulp-replace');
+
+    return gulp.src('dist/scripts/vendor.js')
+        .pipe(addsrc(views_production_js))
+        .pipe(uglify())
+        .pipe(concat('vendor.js'))
+        // replace ejs name from app_xxx_ejs to xxx_ejs
+        .pipe(replace(/"app_([\w_]*_ejs)"/g, '"$1"'))
+        .pipe(gulp.dest('dist/scripts'));
+});
 
 gulp.task('default', ['clean'], function () {
     gulp.start('build');
@@ -111,6 +134,7 @@ gulp.task('watch', ['connect', 'serve'], function () {
         'app/*.html',
         '.tmp/styles/**/*.css',
         'app/scripts/**/*.js',
+        'app/views/**/*.ejs',
         'app/images/**/*'
     ]).on('change', function (file) {
         server.changed(file.path);
@@ -128,10 +152,51 @@ var less = require('gulp-less');
 var path = require('path');
 
 gulp.task('less', function () {
-  return gulp.src('app/less/**/*.less')
-    .pipe(less({
-      paths: [ path.join(__dirname, 'less', 'includes') ]
-    }))
-    .pipe(gulp.dest('app/styles'))
-    .pipe($.size());
+    return gulp.src('app/less/**/*.less')
+        .pipe(less({
+            paths: [ path.join(__dirname, 'less', 'includes') ]
+        }))
+        .pipe(gulp.dest('app/styles'))
+        .pipe($.size());
+});
+
+/* gulp-mocha-phantomjs plugin */
+var mochaPhantomJS = require('gulp-mocha-phantomjs');
+
+gulp.task('test', ['slink'], function () {
+    return gulp.src([
+        'test/**/*.html',
+        '!test/index.html',
+        '!test/bower_components/**/*.html'])
+        .pipe(mochaPhantomJS());
+});
+
+/* gulp-shell plugin */
+var shell = require('gulp-shell');
+
+gulp.task('slink', ['styles'], shell.task([
+    'ln -s ../app/bower_components test/bower_components',
+    'ln -s ../app/scripts test/scripts',
+    'ln -s ../app/styles test/styles',
+    'ln -s ../app/views test/views',
+]));
+
+/* can-compile plugin for canjs */
+var compile = require('can-compile/lib/index.js'),
+    glob = require('glob');
+
+gulp.task('views', function(done) {
+    var options = {
+        version: '2.1.3',     // canjs version
+        out: views_production_js,
+        tags: []
+    }
+
+    // Glob needs a string, but compiler needs an array.
+    glob(['app/views/**/*.ejs'].join(), function (er, files) {
+        compile(files, options, function(error, output, outfile) {
+            console.log('Finished compiling', outfile);
+            done();
+        });
+    });
 });
