@@ -72,6 +72,7 @@ gulp.task('clean', function () {
         'test/bower_components',
         'test/scripts',
         'test/styles',
+        'test/views'
     ], { read: false }).pipe($.clean());
 });
 
@@ -151,37 +152,51 @@ var less = require('gulp-less');
 var path = require('path');
 
 gulp.task('less', function () {
-  return gulp.src('app/less/**/*.less')
-    .pipe(less({
-      paths: [ path.join(__dirname, 'less', 'includes') ]
-    }))
-    .pipe(gulp.dest('app/styles'))
-    .pipe($.size());
+    return gulp.src('app/less/**/*.less')
+        .pipe(less({
+            paths: [ path.join(__dirname, 'less', 'includes') ]
+        }))
+        .pipe(gulp.dest('app/styles'))
+        .pipe($.size());
 });
 
 /* gulp-mocha-phantomjs plugin */
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
-gulp.task('test', ['styles', 'slink'], function () {
-  return gulp.src(['test/**/*.html', '!test/bower_components/**/*.html'])
-      .pipe(mochaPhantomJS());
+gulp.task('test', ['slink'], function () {
+    return gulp.src([
+        'test/**/*.html',
+        '!test/index.html',
+        '!test/bower_components/**/*.html'])
+        .pipe(mochaPhantomJS());
 });
 
 /* gulp-shell plugin */
 var shell = require('gulp-shell');
 
-gulp.task('slink', shell.task([
-  'ln -sf ../app/bower_components test/bower_components',
-  'ln -sf ../app/scripts test/scripts',
-  'ln -sf ../app/styles test/styles',
+gulp.task('slink', ['styles'], shell.task([
+    'ln -s ../app/bower_components test/bower_components',
+    'ln -s ../app/scripts test/scripts',
+    'ln -s ../app/styles test/styles',
+    'ln -s ../app/views test/views',
 ]));
 
 /* can-compile plugin for canjs */
-var compilerGulp = require('can-compile/gulp.js');
-// Creates a task called 'ejs-views'
-compilerGulp.task('views', {
-  version: '2.1.3',     // canjs version
-  src: ['app/views/**/*.ejs'],
-  out: views_production_js,
-  tags: []
-}, gulp);
+var compile = require('can-compile/lib/index.js'),
+    glob = require('glob');
+
+gulp.task('views', function(done) {
+    var options = {
+        version: '2.1.3',     // canjs version
+        out: views_production_js,
+        tags: []
+    }
+
+    // Glob needs a string, but compiler needs an array.
+    glob(['app/views/**/*.ejs'].join(), function (er, files) {
+        compile(files, options, function(error, output, outfile) {
+            console.log('Finished compiling', outfile);
+            done();
+        });
+    });
+});
