@@ -228,14 +228,11 @@
         <script src="bower_components/jquery.cookie/jquery.cookie.js"></script>
         <script src="bower_components/jquery-placeholder/jquery.placeholder.js"></script>
         <script src="bower_components/foundation/js/foundation.js"></script>
-        <script src="bower_components/canjs/can.jquery.js"></script>
-        <script src="bower_components/canjs/can.ejs.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 
-        <!-- build:js scripts/main.js -->
-        <script src="scripts/todos.js"></script>
-        <script src="scripts/main.js"></script>
+        <!-- build:js scripts/main.js data-main="scripts/main" -->
+        <script src="bower_components/requirejs/require.js" data-main="scripts/main"></script>
         <!-- endbuild -->
 </body>
 </html>
