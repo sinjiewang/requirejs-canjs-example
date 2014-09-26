@@ -17,16 +17,7 @@
     </script>
 
     <!-- include source files here... -->
+    <script src="bower_components/requirejs/require.js" data-main="spec/test.config.js"></script>
 
-    <!-- include spec files here... -->
-    <script src="spec/test.js"></script>
-
-    <script>
-        if (window.mochaPhantomJS) {
-            mochaPhantomJS.run();
-        } else {
-            mocha.run();
-        }
-    </script>
 </body>
 </html>

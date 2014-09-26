@@ -87,7 +87,9 @@ gulp.task('build', ['html', 'images', 'fonts', 'extras', 'requirejs', 'requirejs
     return gulp.src('dist/scripts/main.js')
         .pipe(addsrc(['.tmp/' + requirejs_production_js, '.tmp/' + views_production_js]))
         .pipe(concat('main.js'))
+        // add requirejs-views module 'views'
         .pipe(replace(/require\(\[(.*)\],/g, 'require([$1, "views"],'))
+        .pipe(uglify())
         .pipe(gulp.dest('dist/scripts'));
 });
 
@@ -165,8 +167,7 @@ var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
 gulp.task('test', ['slink'], function () {
     return gulp.src([
-        'test/**/*.html',
-        '!test/index.html',
+        'test/index.html',
         '!test/bower_components/**/*.html'])
         .pipe(mochaPhantomJS());
 });
@@ -175,10 +176,10 @@ gulp.task('test', ['slink'], function () {
 var shell = require('gulp-shell');
 
 gulp.task('slink', ['styles'], shell.task([
-    'ln -s ../app/bower_components test/bower_components',
-    'ln -s ../app/scripts test/scripts',
-    'ln -s ../app/styles test/styles',
-    'ln -s ../app/views test/views',
+    'ln -sf ../app/bower_components test/.',
+    'ln -sf ../app/scripts test/.',
+    'ln -sf ../app/styles test/.',
+    'ln -sf ../app/views test/.',
 ]));
 
 /* can-compile plugin for canjs */
@@ -204,6 +205,7 @@ gulp.task('views', function(done) {
 gulp.task('requirejs-views', ['views'], function() {
     var insert = require('gulp-insert');
     return gulp.src('.tmp/' + views_production_js)
+        // create a requirejs module 'views'
         .pipe(insert.wrap('define("views", ["can", "can/view/ejs"], function (can) {', '});'))
         // replace ejs name from app_xxx_ejs to xxx_ejs
         .pipe(replace(/['"]app_([\w_]*_ejs)['"]/g, '"$1"'))
