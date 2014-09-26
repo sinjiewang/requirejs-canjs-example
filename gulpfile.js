@@ -1,8 +1,15 @@
 'use strict';
 // generated on 2014-09-22 using generator-gulp-webapp 0.1.0
 
-var gulp = require('gulp');
-var views_production_js = '.tmp/view.production.js';
+var gulp = require('gulp'),
+    addsrc = require('gulp-add-src'),
+    uglify = require('gulp-uglify'),
+    concat = require('gulp-concat'),
+    replace = require('gulp-replace');
+
+var views_production_js = 'view.production.js';
+var requirejs_production_js = 'requirejs.production.js';
+var main_js = 'main.js';
 
 // load plugins
 var $ = require('gulp-load-plugins')();
@@ -28,7 +35,7 @@ gulp.task('html', ['styles', 'scripts'], function () {
     return gulp.src(['app/*.html'])
         .pipe($.useref.assets({searchPath: '{.tmp,app}'}))
         .pipe(jsFilter)
-        .pipe($.uglify())
+        // .pipe($.uglify())
         .pipe(jsFilter.restore())
         .pipe(cssFilter)
         .pipe($.csso())
@@ -72,21 +79,17 @@ gulp.task('clean', function () {
         'test/bower_components',
         'test/scripts',
         'test/styles',
+        'test/views'
     ], { read: false }).pipe($.clean());
 });
 
-gulp.task('build', ['html', 'images', 'fonts', 'extras', 'views'], function () {
-    var addsrc = require('gulp-add-src'),
-        uglify = require('gulp-uglify'),
-        concat = require('gulp-concat'),
-        replace = require('gulp-replace');
-
-    return gulp.src('dist/scripts/vendor.js')
-        .pipe(addsrc(views_production_js))
+gulp.task('build', ['html', 'images', 'fonts', 'extras', 'requirejs', 'requirejs-views'], function () {
+    return gulp.src('dist/scripts/main.js')
+        .pipe(addsrc(['.tmp/' + requirejs_production_js, '.tmp/' + views_production_js]))
+        .pipe(concat('main.js'))
+        // add requirejs-views module 'views'
+        .pipe(replace(/require\(\[(.*)\],/g, 'require([$1, "views"],'))
         .pipe(uglify())
-        .pipe(concat('vendor.js'))
-        // replace ejs name from app_xxx_ejs to xxx_ejs
-        .pipe(replace(/"app_([\w_]*_ejs)"/g, '"$1"'))
         .pipe(gulp.dest('dist/scripts'));
 });
 
@@ -151,37 +154,75 @@ var less = require('gulp-less');
 var path = require('path');
 
 gulp.task('less', function () {
-  return gulp.src('app/less/**/*.less')
-    .pipe(less({
-      paths: [ path.join(__dirname, 'less', 'includes') ]
-    }))
-    .pipe(gulp.dest('app/styles'))
-    .pipe($.size());
+    return gulp.src('app/less/**/*.less')
+        .pipe(less({
+            paths: [ path.join(__dirname, 'less', 'includes') ]
+        }))
+        .pipe(gulp.dest('app/styles'))
+        .pipe($.size());
 });
 
 /* gulp-mocha-phantomjs plugin */
 var mochaPhantomJS = require('gulp-mocha-phantomjs');
 
-gulp.task('test', ['styles', 'slink'], function () {
-  return gulp.src(['test/**/*.html', '!test/bower_components/**/*.html'])
-      .pipe(mochaPhantomJS());
+gulp.task('test', ['slink'], function () {
+    return gulp.src([
+        'test/index.html',
+        '!test/bower_components/**/*.html'])
+        .pipe(mochaPhantomJS());
 });
 
 /* gulp-shell plugin */
 var shell = require('gulp-shell');
 
-gulp.task('slink', shell.task([
-  'ln -sf ../app/bower_components test/bower_components',
-  'ln -sf ../app/scripts test/scripts',
-  'ln -sf ../app/styles test/styles',
+gulp.task('slink', ['styles'], shell.task([
+    'ln -sf ../app/bower_components test/.',
+    'ln -sf ../app/scripts test/.',
+    'ln -sf ../app/styles test/.',
+    'ln -sf ../app/views test/.',
 ]));
 
 /* can-compile plugin for canjs */
-var compilerGulp = require('can-compile/gulp.js');
-// Creates a task called 'ejs-views'
-compilerGulp.task('views', {
-  version: '2.1.3',     // canjs version
-  src: ['app/views/**/*.ejs'],
-  out: views_production_js,
-  tags: []
-}, gulp);
+var compile = require('can-compile/lib/index.js'),
+    glob = require('glob');
+
+gulp.task('views', function(done) {
+    var options = {
+        version: '2.1.3',     // canjs version
+        out: '.tmp/' + views_production_js,
+        tags: []
+    }
+
+    // Glob needs a string, but compiler needs an array.
+    glob(['app/views/**/*.ejs'].join(), function (er, files) {
+        compile(files, options, function(error, output, outfile) {
+            // console.log('Finished compiling', outfile);
+            done();
+        });
+    });
+});
+
+gulp.task('requirejs-views', ['views'], function() {
+    var insert = require('gulp-insert');
+    return gulp.src('.tmp/' + views_production_js)
+        // create a requirejs module 'views'
+        .pipe(insert.wrap('define("views", ["can", "can/view/ejs"], function (can) {', '});'))
+        // replace ejs name from app_xxx_ejs to xxx_ejs
+        .pipe(replace(/['"]app_([\w_]*_ejs)['"]/g, '"$1"'))
+        .pipe(gulp.dest('.tmp'));
+});
+
+/* gulp-requirejs plugin for requirejs */
+var rjs = require('gulp-requirejs');
+
+gulp.task('requirejs', function() {
+    rjs({
+        baseUrl: 'app/scripts',
+        out: requirejs_production_js,
+        paths: {
+            can: '../bower_components/canjs/amd/can'
+        },
+        name: 'main' // src: app/scripts/main.js
+    })
+        .pipe(gulp.dest('.tmp')); // pipe it to the output DIR
+});
