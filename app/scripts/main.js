@@ -1,3 +1,5 @@
+'use strict';
+
 $(document).foundation();
 
 define('jquery', [], function() {
@@ -13,5 +15,5 @@ require.config({
 });
 
 require(['Control/todos'], function (Todos) {
-    var todos = new Todos('#todos', {});
+    new Todos('#todos', {});
 });
